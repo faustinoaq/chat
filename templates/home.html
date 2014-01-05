@@ -1,16 +1,16 @@
 $def with (user)
 
-<h1>Chat de usuarios - Tu eres <b>$user</b></h1>
+<h1>Users Chat - You are <b>$user</b></h1>
 
 <ul id="chat">
 </ul>
 
 <form id="form" action="/" method="POST">
     <input type="text" name="data" id="input" required>
-    <button type="submit">Enviar</button>
+    <button type="submit">Send</button>
 </form>
 
 $if user == "admin":
-    <a href="/delete">Borrar chats</a>
+    <a href="/delete">Delete chats</a>
 
 <script src="/static/script.js"></script>

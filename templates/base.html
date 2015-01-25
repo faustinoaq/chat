@@ -1,10 +1,31 @@
 $def with (page)
-<!doctype html>
+<!DOCTYPE html>
+<!-- Base HTML Template -->
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Chat</title>
-    <script src="http://code.jquery.com/jquery-2.0.2.min.js"></script>
+    <title>Open Chat</title>
+    <link rel="shortcut icon" href="/static/favicon.ico">
+    <!-- CSS code -->
+    <style media="screen">
+      .chat {
+        background-color: #EEE;
+        margin: 10px;
+        padding: 1%;
+      }
+      .info {
+        font-weight: bold;
+      }
+      pre {
+        overflow: auto;
+      }
+      textarea {
+        display: block;
+        margin: 5px 0 5px 0;
+      }
+    </style>
+    <!-- Jquery dependency -->
+    <script src="/static/jquery-2.1.3.min.js"></script>
 </head>
 <body>
     $:page

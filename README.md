@@ -1,6 +1,6 @@
-# Chat
+# Open Chat
 
-**Chat** is a simple chat **alpha** application build with Python and Ajax.
+**Open Chat** is a simple chat **alpha** application build with Python and Ajax.
 
 ## Features
 

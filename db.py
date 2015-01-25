@@ -1,19 +1,26 @@
 import web
+import time
 
+"""
+Database module
+This module use the ORM SQLAlchemy
+"""
 from sqlalchemy import create_engine, engine
 from sqlalchemy import MetaData, Table, Column
-from sqlalchemy import Integer, TIMESTAMP, TEXT
+from sqlalchemy import Integer, TEXT
 from sqlalchemy.sql import text
 
-system = create_engine('sqlite:///data.db', echo=True)
 
+# ORM Settings and Database connection
+system = create_engine('sqlite:///data.db', echo=True)
 metadata = MetaData(bind=system)
 
+# Create table rows
 data = Table('data', metadata,
     Column('id', Integer, primary_key=True, autoincrement=True),
     Column('user', TEXT()),
     Column('content', TEXT()),
-    Column('timestamp', TIMESTAMP(), server_default=text('current_timestamp')),
+    Column('timestamp', TEXT()),
 )
 
 metadata.create_all()

@@ -1,16 +1,29 @@
-$def with (user)
+$def with (user, data="")
 
-<h1>Users Chat - You are <b>$user</b></h1>
+<!-- HTML template for home -->
 
-<ul id="chat">
-</ul>
+<h1>Open Chat - You are <b>$user</b></h1>
 
+<a href="/logout">
+  <button type="button">
+    Logout
+  </button>
+</a>
+
+<div class="chat">
 <form id="form" action="/" method="POST">
-    <input type="text" name="data" id="input" required>
+    <textarea name="data" id="input" required></textarea>
     <button type="submit">Send</button>
+    $if user == "admin":
+      <button type="button" onclick="Delete();">
+        Delete all
+      </button>
 </form>
+</div>
 
-$if user == "admin":
-    <a href="/delete">Delete chats</a>
+<div id="chat">
+  $:data
+</div>
+
 
 <script src="/static/script.js"></script>

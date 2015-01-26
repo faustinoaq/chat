@@ -20,7 +20,6 @@ urls = (
     '/user', 'User',
     '/delete', 'Delete',
     '/update', 'Update',
-    '/abort', 'Abort',
     '/count', 'Counter',
     '/login', 'Login',
     '/logout', 'Logout',

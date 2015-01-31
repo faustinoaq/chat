@@ -1,29 +1,12 @@
-$def with (user, data="")
+$def with (user, color)
 
-<!-- HTML template for home -->
-
-<h1>Open Chat - You are <b>$user</b></h1>
-
-<a href="/logout">
-  <button type="button">
-    Logout
-  </button>
-</a>
-
-<div class="chat">
-<form id="form" action="/" method="POST">
-    <textarea name="data" id="input" required></textarea>
-    <button type="submit">Send</button>
-    $if user == "admin":
-      <button type="button" onclick="Delete();">
-        Delete all
-      </button>
+<h1>You are $user <span class="usercolor" style="background-color: $color"></span></h1>
+<p><span id="clients"></span> user(s) on the database <button type="button" onclick="toGo('exit');">Exit</button></p>
+<form id="form" class="chat" action="/" method="POST">
+    <textarea name="content" id="content" required></textarea>
+    <button type="submit" id="submit">Send</button>
+    <small><span id="characters">0</span> of 1024</small>
 </form>
-</div>
-
-<div id="chat">
-  $:data
-</div>
-
-
+<div id="chat"></div>
+<script src="/static/jquery-2.1.3.min.js"></script>
 <script src="/static/script.js"></script>

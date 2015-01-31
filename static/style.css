@@ -1,0 +1,54 @@
+body {
+  font-family: sans-serif;
+  margin: 0px auto;
+  max-width: 700px;
+}
+a {
+  text-decoration: none;
+}
+a:hover {
+  text-decoration: underline;
+}
+.wrapper {
+  margin: 0 10px;
+}
+.user, .timestamp {
+  font-size: small;
+  padding: 2px;
+}
+.user {
+  font-weight: bold;
+}
+pre {
+  overflow: auto;
+  padding: 4px;
+}
+textarea {
+  display: block;
+  width: 100%;
+  height: 80px;
+  margin: 5px 0 5px 0;
+  box-sizing: border-box;
+}
+.chat {
+  margin: 10px 0;
+  padding: 1%;
+  background-color: #EEEEEE;
+  border: 1px #D0D0D0 solid;
+}
+.chat pre {
+  background-color: #DFDFDF;
+  border: 1px #B3B3B3 solid;
+}
+.usercolor {
+  width: 11px;
+  height: 11px;
+  display: inline-block;
+  vertical-align: bottom;
+  margin: 3px;
+  border-radius: 8px;
+  border: 1px #080808 solid;
+}
+h1 > .usercolor {
+  vertical-align: middle;
+}

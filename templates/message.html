@@ -1,0 +1,11 @@
+$def with (data, clients)
+
+$for d in data:
+  <div class="chat">
+    $for cli in clients:
+      $if cli['user'] == d['user']:
+        <span class="usercolor" style="background-color: $cli['color']"></span>
+    <span class="user">$d['user']</span>
+    <span class="timestamp">$d['timestamp']</span>
+    <pre><code>$d['content']</code></pre>
+  </div>

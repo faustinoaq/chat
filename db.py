@@ -23,6 +23,14 @@ data = Table('data', metadata,
     Column('timestamp', TEXT()),
 )
 
+# Create table rows
+data = Table('user', metadata,
+    Column('id', Integer, primary_key=True, autoincrement=True),
+    Column('user', TEXT()),
+    Column('color', TEXT()),
+    Column('timestamp', TEXT()),
+)
+
 metadata.create_all()
 
 db = web.database(dbn='sqlite', db='data.db')

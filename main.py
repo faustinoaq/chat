@@ -1,187 +1,161 @@
 """
-Python2.7 code by @faustinoaq
-This is a app that use Web.py micro framework
-install dependences:
-pip install -r requirements.txt
-and run with:
-python main.py
+    Open Chat by @faustinoaq
+    This app use Web.py micro web framework
+    and SQLAlchemy ORM
 """
 
-import web  # Web.py Framework
-import time  # Date timestamp
-import socket  # Server ip
-from hashlib import sha1  # Pass check
+import web   # Web.py framework
+import json  # Used for generate JSON documents
+import time  # Used for generate timestamps
+from db import db  # Get the database queries
+from random import randrange  # Used for generate random numbers
 
-from db import db  # Database ORM
+web.config.debug = False
 
-# URL's and classes
+# Routes and classes
 urls = (
-    '/','Index',
-    '/user', 'User',
-    '/delete', 'Delete',
-    '/update', 'Update',
-    '/count', 'Counter',
-    '/login', 'Login',
-    '/logout', 'Logout',
+    '/', 'Index',
+    '/data/(.*)', 'Data',
+    '/exit', 'Exit',
+    '/reset', 'Reset'
 )
 
-# Web.py variable for app
 app = web.application(urls, globals())
 
-# Web.py variable for template folder
-# and setting base.html
 render = web.template.render('templates', base='base', globals={})
-
-# Admin access key is "123"
-Key="40bd001563085fc35165329ea1ff5c5ecbdbbeef"
-
-class Login:
-    """
-    Login for admin cases
-    """
-    def GET(self):
-        return render.login()
-
-    def POST(self):
-        i = web.input().key
-        key = unicode(i).encode('UTF-8')
-        key = key + "h&g/8"  # key salt
-        if sha1(key).hexdigest() == Key:
-            web.setcookie('key', Key, 3600)
-            web.setcookie('user', 'admin', 3600)
-            raise web.seeother('/')
-        else:
-            raise web.seeother('/login')
-
-class Logout:
-    """
-    Logout the user
-    """
-    def GET(self):
-        web.setcookie('key', '', 3600)
-        web.setcookie('user', '', 3600)
-        raise web.seeother('/user')
-
-
-# Function for check if admin is active
-def logged(function):
-    def GET(*args, **kwargs):
-        # try:
-        key = web.cookies().key
-        print(key)
-        if key == Key:
-            print("Admin is verified - OK")
-            return function(*args, **kwargs)
-        print("Admin is not verified - FAIL")
-        raise web.seeother('/login')
-    return GET
+make = web.template.render('templates', globals={})
 
 
 class Index:
-    """
-    Index class:
-    - Check if username exist
-    - Return all data
-    - Insert data in database
-    """
 
     def __init__(self):
+        self.maxUsers = 10  # LIMITED TO 30 USERS/COLORS
+        clients = db.select('user', what='count(*) as count')[0]
+        if clients.count >= self.maxUsers:
+            raise web.seeother('/data/warning')
         try:
-            self.user = web.cookies().user
-            if not self.user:
-                raise web.seeother('/user')
-        except:
-            raise web.seeother('/user')
+            cookie = web.cookies()
+            if cookie.user == '' and cookie.color == '':
+                Color = self.color()
+                User = self.name()
+                web.setcookie('color', Color, 604800)
+                web.setcookie('user', User, 604800)
+                timestamp = time.strftime("%Y-%m-%d %I:%M:%S %p")
+                db.insert('user', user=User,
+                                  color=Color,
+                                  timestamp=timestamp)
+            else:
+                data = db.select('user', where='user="{0}"'.format(cookie.user))
+                if not data:
+                    x
+        except BaseException as ex:
+            print ex
+            web.setcookie('user', '', 3600)
+            web.setcookie('color', '', 3600)
+            raise web.seeother('/')
+
+    def color(self):
+        stepRange = 50 # Max color = 255/stepRange * 6
+        r = randrange(start=100, stop=255, step=stepRange)
+        b = randrange(100, 255, stepRange)
+        g = randrange(100, 255, stepRange)
+        rgb = [
+            [255, 0, b],
+            [0, g, 255],
+            [r, 0, 255],
+            [r, 255, 0],
+            [0, 255, b],
+            [255, g, 0],
+        ]
+        existColor = True
+        while existColor:
+            rgb = rgb[randrange(0, 6, 1)]
+            color = "rgb({0}, {1}, {2})".format(rgb[0], rgb[1], rgb[2])
+            data = db.select('user', where='color="{0}"'.format(color))
+            if data:
+                existColor = True
+            else:
+                existColor = False
+        return color
+
+    def name(self):
+        existUser = True
+        while existUser:
+            user = 'User' + str(randrange(1, self.maxUsers*5, 1))
+            data = db.select('user', where='user="{0}"'.format(user))
+            if data:
+                existUser = True
+            else:
+                existUser = False
+        return user
 
     def GET(self):
-        data = db.select('data', order="id DESC")
-        if data:
-            send = []
-            for dat in data:
-                chat = '<div class="chat">'
-                chat += '<span class="info">{0} - '.format(dat.user)
-                chat += '{0}</span>'.format(dat.timestamp)
-                chat += '<pre><code>{0}</code></pre>'.format(unicode(dat.content).encode('UTF-8'))
-                chat += '</div>'
-                send.append(chat)
-            del send[-1]
-            return render.home(self.user, ''.join(send))
-        return render.home(self.user, "")
-
-    def POST(self):
-        i = web.input()
-        data = unicode(i.data).encode('UTF-8')  # Allow No ASCCI characters
-        date = time.strftime("%Y-%m-%d %I:%M:%S %p")  # Current timestamp
-        db.insert('data', content=i.data, user=self.user, timestamp=date)
-
-
-class User:
-    """
-    User class:
-    - Render username form
-    - Check if username is admin
-    - Set username
-    """
-
-    def GET(self):
-        return render.user()
-
-    def POST(self):
-        i = web.input()
-        user = unicode(i.user).encode('UTF-8')
-        if user == "admin":
-            raise web.seeother('/login')
-        else:
-            web.setcookie('user', user, 3600)
+        cookie = web.cookies()
+        if cookie.user and cookie.color:
+            return render.home(cookie.user, cookie.color)
         raise web.seeother('/')
 
+    def POST(self):
+        i = web.input()
+        cookie = web.cookies()
+        timestamp = time.strftime("%Y-%m-%d %I:%M:%S %p")
+        db.insert('data', timestamp=timestamp,
+                          content=i.content,
+                          user=cookie.user)
 
-class Delete:
-    """
-    Delete class:
-    - Delete all messages of database
-    """
+class Data:
 
-    @logged
+
+    def hackIter(self, Iterbetter):
+        list = []
+        for Iter in Iterbetter:
+            list.append(Iter)
+        return list
+
+    def GET(self, data):
+        if data == "report":
+            clients = db.select('user', what='count(*) as count')[0]
+            messages = db.select('data', what='count(*) as count')[0]
+            report = {'clients': clients.count, 'messages': messages.count}
+            return "report = {0}".format(json.dumps(report, indent=4))
+        if data == "users":
+            users = self.hackIter(db.select('user'))
+            return "users = {0}".format(json.dumps(users, indent=4))
+        elif data == "last-message":
+            data = self.hackIter(db.select('data', order="id DESC", limit=1))
+            clients = self.hackIter(db.select('user'))
+            return make.message(data, clients)
+        elif data == "recent-messages":
+            data = self.hackIter(db.select('data', order="id DESC", limit=100))
+            clients = self.hackIter(db.select('user'))
+            return make.message(data, clients)
+        elif data == "all-messages":
+            data = self.hackIter(db.select('data', order="id DESC"))
+            clients = self.hackIter(db.select('user'))
+            return make.message(data, clients)
+        elif data == "warning":
+            return render.warning()
+
+
+class Exit:
+
     def GET(self):
+        cookie = web.cookies()
+        web.setcookie('user', '', 3600)
+        web.setcookie('color', '', 3600)
+        db.delete('user', where='user="{0}"'.format(cookie.user))
+        db.delete('data', where='user="{0}"'.format(cookie.user))
+        return render.bye()
+
+
+class Reset:
+
+    def GET(self):
+        db.delete('user', where="id>0")
         db.delete('data', where="id>0")
+        web.setcookie('user', '', 3600)
+        web.setcookie('color', '', 3600)
+        return render.bye()
 
-class Counter:
-    """
-    Counter class:
-    - Get a count of database entries
-      This is used for Ajax functions
-    """
-
-    def GET(self):
-        return db.select('data', what='count(*) as count')[0].count
-
-
-class Update:
-    """
-    Update class:
-    - Get the last entry
-      This is used for update the entries via Ajax
-    """
-
-    def GET(self):
-        try:
-            data = db.select('data', order="id DESC")[0]
-        except:
-            return ""
-        send = []
-        chat = '<div class="chat">'
-        chat += '<span class="info">{0} - '.format(data.user)
-        chat += '{0}</span>'.format(data.timestamp)
-        chat += '<pre><code>{0}</code></pre>'.format(unicode(data.content).encode('UTF-8'))
-        chat += '</div>'
-        send.append(chat)
-        return send[0]
-
-# Execute app
 if __name__ == '__main__':
-    # Get local ip and set the port
-    # Run with a light WSGI server
-    ip = socket.gethostbyname(socket.gethostname())
-    port = 8080
-    web.httpserver.runsimple(app.wsgifunc(), (ip, port))
+    app.run()

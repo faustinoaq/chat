@@ -12,7 +12,7 @@
 Install Dependencies.
 
 ```
-sudo pip install -r requirements.txt
+pip install -r requirements.txt
 ```
 
 Run Gestor with your local ip
